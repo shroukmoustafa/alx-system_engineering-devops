@@ -1,35 +1,26 @@
-#!/usr/bin/python3
-"""Module that consumes the Reddit API and returns the number of subscribers"""
 import requests
 
-
 def number_of_subscribers(subreddit):
-    """Queries the Reddit API and returns the number of subscribers (not
-    active users, total subscribers) for a given subreddit.
+    """Query Reddit API and return the number of subscribers."""
+    # Set the User-Agent header to avoid 'Too Many Requests' error
+    headers = {'User-Agent': 'MyRedditApp/0.1'}
+    
+    # Define the URL for the subreddit's about.json endpoint
+    url = f"https://www.reddit.com/r/{subreddit}/about.json"
+    
+    try:
+        # Make a GET request to the Reddit API
+        response = requests.get(url, headers=headers, allow_redirects=False)
+        
+        # If the status code is 200, we assume the subreddit is valid
+        if response.status_code == 200:
+            data = response.json()
+            return data.get("data", {}).get("subscribers", 0)
+        
+        # If the status code is not 200, return 0 (invalid subreddit)
+        else:
+            return 0
+    except requests.RequestException:
+        # If there was a network-related error, return 0
+        return 0
 
-    If not a valid subreddit, return 0.
-    Invalid subreddits may return a redirect to search results. Ensure that
-    you are not following redirects.
-
-    Args:
-        subreddit (str): subreddit
-
-    Returns:
-        int: number of subscribers
-    """
-    base_url = 'https://www.reddit.com/r/'
-
-    url = '{}{}/about.json'.format(base_url, subreddit)
-    headers = {
-        'User-Agent':
-        'Mozilla/5.0 (Windows; U; Windows NT 5.1; de; rv:1.9.2.3) \
-        Gecko/20100401 Firefox/3.6.3 (FM Scene 4.6.1)'
-    }
-    results = requests.get(
-        url,
-        headers=headers,
-        allow_redirects=False
-    )
-    if results.status_code == 200:
-        return results.json()['data']['subscribers']
-    return 0
