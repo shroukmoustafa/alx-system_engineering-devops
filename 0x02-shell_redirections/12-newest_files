@@ -1,2 +1,2 @@
 #!/bin/bash  
-la -t1A | head -n 10
+la -t1 | head -n 10
